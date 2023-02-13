@@ -1,8 +1,8 @@
-
 # Data
 *.csv
 *.xlsx
 *.DS_Store
+*.parquet
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
