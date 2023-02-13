@@ -18,7 +18,7 @@ To run the model go to the console and run following command:
 python main.py
 ```
 
-You should be at the source of the repository structure (ie. natives_deephedging) when running the command.
+You should be at the source of the repository structure (ie. bcg_strat) when running the command.
 
 ## 🗂 Repository structure
 
