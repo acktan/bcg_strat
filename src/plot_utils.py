@@ -15,8 +15,8 @@ def plot_ts(ts, date_dimension="year/week", to_plot_dimension="sales_net"):
 
     to_plot = to_plot[[f"{date_dimension}", f"{to_plot_dimension}", "order_channel"]]\
         .groupby(["order_channel", f"{date_dimension}"])\
-        .sum()
-    to_plot2 = to_plot2.reset_index()
+        .sum()\
+        .reset_index()
 
     # Create plot 
     fig = go.Figure()
