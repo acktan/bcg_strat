@@ -5,6 +5,7 @@ from mlxtend.frequent_patterns import fpgrowth
 import polars as pl
 import os
 import numpy as np
+import math
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -44,7 +45,7 @@ def order_history(df: pd.Dataframe) -> pd.Dataframe:
     df['max_time_between_transactions'] = df.groupby('client_id')['weeks_since_last_transaction'].transform('max')
     return df
 
-def churn(df: pd.Dataframe) -> pd.Dataframe:
+def churn(df):
     """
     Computes churn rate for each client based on their transaction history.
     A client churned if he last bought something more than 3x the average transaction time or 1.5x the max transaction time 
@@ -58,6 +59,31 @@ def churn(df: pd.Dataframe) -> pd.Dataframe:
     df: The dataframe with additional columns for churn rate calculation.
     """
     df = order_history(df)
-    df['churn']= np.where(df['weeks_since_last_transaction']>
-                               3*df['avg_time_between_transactions'] or 1,5 *df['max_time_between_transactions'] ,1,0)
+    df['churn'] = np.where((df['weeks_since_last_transaction'] > 3 * df['avg_time_between_transactions']) |
+                           (df['weeks_since_last_transaction'] > 1.5 * df['max_time_between_transactions']), 1, 0)
+   
     return df
+def churn_rate(df):
+    rate = df['churn'].sum()/df['churn'].count()
+    return rate
+
+def order_invoice_diff(df):
+    df['order_invoice_diff'] = (pd.to_datetime(df['order_date']) - pd.to_datetime(df['invoice_date'])).dt.days
+    return df
+
+def weekly_data(df):
+    df = clean_data(df)
+    df = churn(df)
+    df.drop(['date_invoice','order_channel','week'], axis =1)
+    df = df.groupby(["client_id", pd.Grouper(key="date_order",freq='W')]).agg({
+    "quantity": "sum",
+    "sales_net": "sum",
+    'churn':'max',
+    'weeks_since_last_transaction':'max',
+    'avg_time_between_transactions':'mean'  ,
+    'max_time_between_transactions': 'max',  
+}).reset_index()
+    df["total_quantity_per_id"] = df.groupby(["client_id"])["quantity"].transform("sum")
+    df["total_sales_id"] = df.groupby(["client_id"])["sales_net"].transform("sum")
+    return df
+    
