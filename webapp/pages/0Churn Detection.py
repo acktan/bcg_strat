@@ -87,12 +87,11 @@ with churn_columns[1]:
             pred2 += [0]
     cf_matrix = confusion_matrix(y_test, pred2)
     fig, ax = plt.subplots(figsize=(5,3))
-    sns.heatmap(cf_matrix/np.sum(cf_matrix), annot=True, cmap="Reds", fmt=".1%", cbar=False, ax=ax)
+    sns.heatmap(cf_matrix/np.sum(cf_matrix), annot=True, cmap="Greens", fmt=".1%", cbar=False, ax=ax)
 
     # Set the axis labels and title
     ax.set_xlabel("Predicted Label")
     ax.set_ylabel("True Label")
-    ax.set_title("Confusion Matrix")
 
     # Display the figure in Streamlit
     st.pyplot(fig)
@@ -103,11 +102,8 @@ with churn_columns[1]:
 st.subheader("Clients that are most at risk of churning:")
 if 'topchurners' not in st.session_state:
     st.session_state['topchurners'] = df.groupby(['client_id'])['churn_prediction', 'sales_net']\
-        .mean().sort_values(['churn_prediction', 'sales_net'], ascending=False).head(10)
+        .mean()
         
 topchurners = st.session_state['topchurners']
-st.table(topchurners)
-
-
-
-
+topchurners['churn_sales_score'] = topchurners['churn_prediction'] * topchurners['sales_net']
+st.table(topchurners.sort_values(['churn_sales_score'], ascending=False)['churn_sales_score'].head(10))
