@@ -30,7 +30,7 @@ def order_history(df: pd.DataFrame) -> pd.DataFrame:
     df = df.sort_values(['client_id', 'date_order'])
     
     # create a new dataframe to hold the time deltas
-    time_diffs = df.groupby('client_id')['date_order'].diff().fillna(pd.Timedelta(0))
+    df['time_diff'] = df.groupby('client_id')['date_order'].diff().fillna(pd.Timedelta(0))
     # add a new column to the dataframe with the number of weeks since each client's last transaction
     df['weeks_since_last_transaction'] = df['time_diff'].dt.days /7
 
