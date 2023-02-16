@@ -27,7 +27,7 @@ You should be at the source of the repository structure (ie. bcg_strat) when run
 
 Our repository is structured in the following way:
 ```
-|natives_deephedging
+|bcg_strat
    |--images
    |--models
    |--notebooks
