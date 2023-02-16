@@ -90,7 +90,7 @@ class Computing():
         
         sales_weekly = df.groupby(pd.Grouper(key='date_order', freq='7d')).agg({'sales_net': 'mean'})
         sales_channel = df.groupby(['date_order', 'order_channel'])['sales_net'].sum(numeric_only=True).reset_index()
-        sales_channel_weekly = sales_channel.groupby(['order_channel']).resample('W', on='date_order').sum(numeric_only=True)
+        sales_channel_weekly = sales_channel.groupby(['order_channel']).resample('W', on='date_order').sum()
         
         return sales_channel_weekly
 
@@ -111,7 +111,7 @@ class Computing():
         
         quantity_weekly = df.groupby(pd.Grouper(key='date_order', freq='7d')).agg({'quantity': 'mean'})
         quantity_channel = df.groupby(['date_order', 'order_channel'])['quantity'].sum(numeric_only=True).reset_index()
-        quantity_channel_weekly = quantity_channel.groupby(['order_channel']).resample('W', on='date_order').sum(numeric_only=True)
+        quantity_channel_weekly = quantity_channel.groupby(['order_channel']).resample('W', on='date_order').sum()
         
         return quantity_channel_weekly
     
@@ -133,58 +133,19 @@ class Computing():
         
     @staticmethod
     def plotly_stackgraph(df: pd.DataFrame, 
-                          title: str = None) -> go.Figure:
-        fig = go.Figure()
-        for channel in df.index.get_level_values('order_channel').unique():
-            x = df.loc[channel, :]
-            y = df.loc[channel, :]
-            fig.add_trace(go.Scatter(x=x, y=y, mode="markers", name=channel))
-            
-        fig.update_layout(yaxis_title='Quantity', width=800, height=400)
-        fig.update_layout(xaxis_title='Date (aggregated per week)', width=800, height=400)
+                          title: str,
+                          ylabel: str,
+                          to_plot_dimension: str) -> go.Figure:
         
-        if title:
-            fig.update_layout(title=title)
+        fig = go.Figure()
+        df = df.reset_index()
+        for channel in df.order_channel.unique():
+            x = df[df.order_channel==channel]['date_order']
+            y = df[df.order_channel==channel][to_plot_dimension]
+            fig.add_trace(go.Scatter(x=x, y=y, mode="markers", name=channel))
+                    
+        fig.update_layout(yaxis_title=ylabel, width=800, height=400)
+        fig.update_layout(xaxis_title='Date (aggregated per week)', width=800, height=400)
+        fig.update_layout(title=title)
         
         return fig
-
-
-
-"""transaction_path = 'data/transaction_data_short.csv'
-relation_path = 'data/sales_client_relationship_dataset.csv'
-
-loader = LoadData(transaction_path, relation_path)
-df = loader.get_data()
-
-
-compute = Computing(df)
-sales_values = compute.sales()
-quant_values = compute.quantity()
-
-fig = go.Figure()
-for channel in sales_values.index.get_level_values('order_channel').unique():
-    x = sales_values.loc[channel, :]
-    y = sales_values.loc[channel, :]
-    fig.add_trace(go.Scatter(x=x, y=y, mode="markers", name=channel))
-
-fig.update_layout(yaxis_title='Quantity', width=800, height=400)
-fig.update_layout(xaxis_title='Date (aggregated per week)', width=800, height=400)
-
-fig.show()
-
-def plot_stackgraph(df: pd.DataFrame,
-                        title: str) -> type[plt.figure]:
-        
-        _, ax = plt.subplots()
-        for cols in df.index.get_level_values('order_channel').unique():
-            ax.plot(df.loc[cols, :], label=cols)
-        
-        ax.legend()
-        plt.xlabel('Date')
-        plt.xticks(rotation=90)
-        plt.ylabel('Quantity')
-        plt.title(title)
-        plt.show()
-        
-plot_stackgraph(sales_values, 'tttt')"""
-

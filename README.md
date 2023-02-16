@@ -12,10 +12,11 @@ To ensure that all libraries are installed pip install the requirements file:
 pip install -r requirements.txt
 ```
 
-To run the model go to the console and run following command: 
+To run the webapp go to the console and run following command: 
  
 ```
-python main.py
+cd webapp
+streamlit run Home.py
 ```
 
 You should be at the source of the repository structure (ie. bcg_strat) when running the command.
