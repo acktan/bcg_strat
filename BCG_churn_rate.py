@@ -24,7 +24,6 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-
 def order_history(df: pd.DataFrame) -> pd.DataFrame:
     df['date_order'] = pd.to_datetime(df['date_order'])
     df['week'] = df['date_order'].dt.isocalendar().week
@@ -128,6 +127,5 @@ def get_last_churn_dates(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 df = import_data()
-print(df)
-
 df = weekly_data(df)
+df_last = get_last_churn_dates(df)
