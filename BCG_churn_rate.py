@@ -39,6 +39,7 @@ def order_invoice_diff(df):
     return df
 
 def order_history(df):
+    
     df['date_order'] = pd.to_datetime(df['date_order'])
     max_date = df['date_order'].max()
     df['week'] = df['date_order'].dt.isocalendar().week
@@ -49,10 +50,11 @@ def order_history(df):
     df['time_diff_1'] = df.groupby('client_id')['date_order'].diff(-1).fillna(pd.Timedelta(0))* -1
     
     
-    df['weeks_until_next_transaction'] = df['time_diff_1'].dt.days / 7
-    df['weeks_until_next_transaction'] = df['weeks_until_next_transaction'].fillna(0).apply(lambda x: math.ceil(x))
-    df['weeks_until_next_transaction'] = np.where(df['weeks_until_next_transaction']==0,
-                                                   np.ceil(((max_date - df['date_order']).dt.days / 7)), df['weeks_until_next_transaction'])
+    df['weeks_until_next_transaction'] = np.where(df['time_diff_1'].dt.days / 7 ==0,0.0003,df['time_diff_1'].dt.days / 7)
+    df['weeks_until_next_transaction'] = df['weeks_until_next_transaction']
+
+    df['weeks_until_next_transaction'] = np.where(df['weeks_until_next_transaction'] <=0.0002,
+                                                   np.ceil(((max_date - df['date_order']).dt.days / 7)), np.ceil(df['weeks_until_next_transaction']))
     
     df['weeks_since_last_transaction'] = df['time_diff'].dt.days /7
     df = order_invoice_diff(df)
@@ -78,19 +80,22 @@ def churn(df: pd.DataFrame) -> pd.DataFrame:
     df: The dataframe with additional columns for churn rate calculation.
     """
     df = order_history(df)
-    df['churn'] = np.where((df['weeks_until_next_transaction'] > 10 * df['avg_time_between_transactions']) |
-                           (df['weeks_until_next_transaction'] > 2.5 * df['max_time_between_transactions']), 1, 0)
+   # df['churn'] = np.where((df['weeks_until_next_transaction'] > 10 * df['avg_time_between_transactions']) |
+    #                       (df['weeks_until_next_transaction'] > 4.5 * df['max_time_between_transactions']), 1, 0)
+    df['churn'] = np.where((df['weeks_until_next_transaction'] > df['weeks_until_next_transaction'].quantile(0.9)), 1, 0)
    
     return df
+
 def churn_rate(df):
     rate = df['churn'].sum()/df['churn'].count()
     return rate
 
 
 
-def weekly_data(df: pd.DataFrame) -> pd.DataFrame:
-    df = clean_data(df)
+def weekly_data(df):
+    
     df = churn(df)
+    df = clean_data(df)
     df.drop(['date_invoice','order_channel','week'], axis =1)
     df = df.groupby(["client_id", pd.Grouper(key="date_order",freq='W')]).agg({
     "quantity": "sum",
@@ -139,8 +144,10 @@ def get_last_churn_dates(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 df = import_data()
-df_sub = df.sample(n=1000000)
-df_1 = weekly_data(df_sub)
-df_last = get_last_churn_dates(df_sub)
-#df_1.to_csv('sample_total_data.csv',index =False)
-#df_last.to_csv('last_churn.csv',index =False)
+df = df.sample(n=2000000)
+df_1 = weekly_data(df)
+df_last = get_last_churn_dates(df)
+#print(churn_rate(df_1))
+#print(df_1)
+df_1.to_csv('sample_total_data_V4.csv',index =False)
+df_last.to_csv('last_churn_V4.csv',index =False)
