@@ -26,3 +26,17 @@ You should be at the source of the repository structure (ie. bcg_strat) when run
 ## 🗂 Repository structure
 
 Our repository is structured in the following way:
+```
+|natives_deephedging
+   |--images
+   |--models
+   |--notebooks
+   |--src
+   |--webapp
+   |-----pages
+   |-----.streamlit
+   |-----Home.py
+   |--data_exploration.py
+   |--README.md
+   |--requirements.txt
+```
