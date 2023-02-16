@@ -2,7 +2,10 @@ import plotly.graph_objects as go
 import pandas as pd
 
 def plot_ts(ts, date_dimension="year/week", to_plot_dimension="sales_net"):
-    # Preprocesse
+    """
+    Generate the figure to plot the evolution of to_plot_dimension regarding date_dimension.
+    """
+    # Preprocess
     to_plot = ts.copy()
     to_plot["date_order"] = pd.to_datetime(to_plot.date_order)
     
