@@ -82,7 +82,7 @@ def churn(df: pd.DataFrame) -> pd.DataFrame:
     df = order_history(df)
    # df['churn'] = np.where((df['weeks_until_next_transaction'] > 10 * df['avg_time_between_transactions']) |
     #                       (df['weeks_until_next_transaction'] > 4.5 * df['max_time_between_transactions']), 1, 0)
-    df['churn'] = np.where((df['weeks_until_next_transaction'] > df['weeks_until_next_transaction'].quantile(0.9)), 1, 0)
+    df['churn'] = np.where((df['weeks_until_next_transaction'] > 5*df['weeks_until_next_transaction']), 1, 0)
    
     return df
 
